@@ -1,0 +1,32 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Java / Maven
+target/
+*.class
+*.jar
+*.war
+
+# Node.js
+node_modules/
+dist/
+build/
+
+# Логи
+*.log
+logs/
+
+# Переменные окружения (СЕКРЕТЫ!)
+.env
+.env.local
+*.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Временные файлы
+*.tmp
+*.swp
