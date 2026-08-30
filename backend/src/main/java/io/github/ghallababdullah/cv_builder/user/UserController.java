@@ -6,10 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -20,6 +17,12 @@ public class UserController {
     public ResponseEntity<UserResponse>createUser(@Valid @RequestBody RegisterUserRequest req){
       UserResponse response=  userService.register(req);
       return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUser(@PathVariable Long id){
+        UserResponse res = userService.getById(id);
+        return ResponseEntity.ok(res);
     }
 
 }

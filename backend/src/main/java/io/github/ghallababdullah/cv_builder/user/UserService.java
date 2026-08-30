@@ -45,4 +45,8 @@ public class UserService {
         // 5. Вернуть DTO (без пароля!)
         return new UserResponse(saved.getEmail(), saved.getFullName(), saved.getId(), saved.getCreatedAt());
     }
+    public UserResponse getById(Long id){
+        User user = userRepository.findById(id).orElseThrow(()-> new UserNotFoundException(id));
+        return new UserResponse(user.getEmail(), user.getFullName(), user.getId(), user.getCreatedAt());
+    }
 }
