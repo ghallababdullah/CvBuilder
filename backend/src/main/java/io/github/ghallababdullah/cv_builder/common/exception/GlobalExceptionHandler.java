@@ -1,5 +1,6 @@
 package io.github.ghallababdullah.cv_builder.common.exception;
 
+import io.github.ghallababdullah.cv_builder.template.TemplateNotFoundException;
 import io.github.ghallababdullah.cv_builder.user.EmailAlreadyExistsException;
 import io.github.ghallababdullah.cv_builder.user.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -119,6 +120,24 @@ public class GlobalExceptionHandler {
 
 
 
+    }
+    @ExceptionHandler(TemplateNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleTemplateNotFound(
+            TemplateNotFoundException ex,
+            HttpServletRequest request
+    ) {
+        log.warn("Template not found: {}", ex.getMessage());
+
+        ErrorResponse error = new ErrorResponse(
+                Instant.now(),
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                ex.getMessage(),
+                request.getRequestURI(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
 }

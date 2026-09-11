@@ -46,6 +46,7 @@ public class UserService {
         return new UserResponse(saved.getEmail(), saved.getFullName(), saved.getId(), saved.getCreatedAt());
     }
     public UserResponse getById(Long id){
+        log.info("Fetching user by id: {}", id);
         User user = userRepository.findById(id).orElseThrow(()-> new UserNotFoundException(id));
         return new UserResponse(user.getEmail(), user.getFullName(), user.getId(), user.getCreatedAt());
     }
