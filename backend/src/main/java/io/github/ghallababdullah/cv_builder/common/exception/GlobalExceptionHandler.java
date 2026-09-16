@@ -1,5 +1,6 @@
 package io.github.ghallababdullah.cv_builder.common.exception;
 
+import io.github.ghallababdullah.cv_builder.auth.dto.InvalidCredentialsException;
 import io.github.ghallababdullah.cv_builder.resume.ResumeNotFoundException;
 import io.github.ghallababdullah.cv_builder.template.TemplateNotFoundException;
 import io.github.ghallababdullah.cv_builder.user.EmailAlreadyExistsException;
@@ -157,6 +158,25 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidCredentials(
+            InvalidCredentialsException ex,
+            HttpServletRequest request
+    ) {
+        log.warn("Invalid credentials attempt");
+
+        ErrorResponse error = new ErrorResponse(
+                Instant.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                "Unauthorized",
+                ex.getMessage(),
+                request.getRequestURI(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 
 }
