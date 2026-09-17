@@ -1,15 +1,15 @@
 package io.github.ghallababdullah.cv_builder.resume;
 
+import io.github.ghallababdullah.cv_builder.auth.SecurityUtils;
 import io.github.ghallababdullah.cv_builder.resume.dto.CreateResumeRequest;
 import io.github.ghallababdullah.cv_builder.resume.dto.ResumeResponse;
 import io.github.ghallababdullah.cv_builder.template.Template;
 import io.github.ghallababdullah.cv_builder.template.TemplateNotFoundException;
 import io.github.ghallababdullah.cv_builder.template.TemplateRepository;
 import io.github.ghallababdullah.cv_builder.user.User;
-import io.github.ghallababdullah.cv_builder.user.UserNotFoundException;
-import io.github.ghallababdullah.cv_builder.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,26 +22,22 @@ import java.util.List;
 public class ResumeService {
 
     private final ResumeRepository resumeRepository;
-    private final UserRepository userRepository;
     private final TemplateRepository templateRepository;
+    private final SecurityUtils securityUtils;
 
     @Transactional
     public ResumeResponse create(CreateResumeRequest request) {
+        User currentUser = securityUtils.getCurrentUser();
         log.info("Creating resume for user {} with template {}",
-                request.getUserId(), request.getTemplateId());
+                currentUser.getEmail(), request.getTemplateId());
 
-        // Проверяем что user существует
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new UserNotFoundException(request.getUserId()));
-
-        // Проверяем что template существует
         Template template = templateRepository.findById(request.getTemplateId())
                 .orElseThrow(() -> new TemplateNotFoundException(request.getTemplateId()));
 
         Resume resume = new Resume();
         Instant now = Instant.now();
 
-        resume.setUser(user);
+        resume.setUser(currentUser);
         resume.setTemplate(template);
         resume.setTitle(request.getTitle());
         resume.setFormData(request.getFormData());
@@ -56,17 +52,10 @@ public class ResumeService {
     }
 
     @Transactional(readOnly = true)
-    public List<ResumeResponse> getAllActive() {
-        log.info("Fetching all active resumes");
-        return resumeRepository.findByIsActiveTrue()
-                .stream()
-                .map(this::toResponse)
-                .toList();
-    }
+    public List<ResumeResponse> getMyResumes() {
+        Long userId = securityUtils.getCurrentUserId();
+        log.info("Fetching resumes for current user id: {}", userId);
 
-    @Transactional(readOnly = true)
-    public List<ResumeResponse> getByUserId(Long userId) {
-        log.info("Fetching resumes for user: {}", userId);
         return resumeRepository.findByUserIdAndIsActiveTrue(userId)
                 .stream()
                 .map(this::toResponse)
@@ -78,6 +67,9 @@ public class ResumeService {
         log.info("Fetching resume by id: {}", id);
         Resume resume = resumeRepository.findById(id)
                 .orElseThrow(() -> new ResumeNotFoundException(id));
+
+        checkOwnership(resume);
+
         return toResponse(resume);
     }
 
@@ -86,9 +78,25 @@ public class ResumeService {
         log.info("Soft-deleting resume with id: {}", id);
         Resume resume = resumeRepository.findById(id)
                 .orElseThrow(() -> new ResumeNotFoundException(id));
+
+        checkOwnership(resume);
+
         resume.setIsActive(false);
         resume.setUpdatedAt(Instant.now());
         resumeRepository.save(resume);
+    }
+
+    /**
+     * Проверяет что текущий user — владелец резюме.
+     * Если нет — бросает AccessDeniedException (Spring вернёт 403).
+     */
+    private void checkOwnership(Resume resume) {
+        Long currentUserId = securityUtils.getCurrentUserId();
+        if (!resume.getUser().getId().equals(currentUserId)) {
+            log.warn("User {} tried to access resume {} owned by user {}",
+                    currentUserId, resume.getId(), resume.getUser().getId());
+            throw new AccessDeniedException("You don't have access to this resume");
+        }
     }
 
     private ResumeResponse toResponse(Resume r) {

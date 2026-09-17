@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateResumeRequest {
 
-    @NotNull(message = "User ID is required")
-    private Long userId;
 
     @NotNull(message = "Template ID is required")
     private Long templateId;

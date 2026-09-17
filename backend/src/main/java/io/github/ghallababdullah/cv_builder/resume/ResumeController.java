@@ -24,12 +24,8 @@ public class ResumeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ResumeResponse>> getAll(
-            @RequestParam(required = false) Long userId
-    ) {
-        List<ResumeResponse> resumes = (userId != null)
-                ? resumeService.getByUserId(userId)
-                : resumeService.getAllActive();
+    public ResponseEntity<List<ResumeResponse>> getMyResumes() {
+        List<ResumeResponse> resumes = resumeService.getMyResumes();
         return ResponseEntity.ok(resumes);
     }
 
