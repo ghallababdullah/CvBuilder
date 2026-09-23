@@ -29,7 +29,10 @@ public class SecurityConfig {
                         // Публичные endpoints
                         .requestMatchers( "/api/health",
                                 "/api/users/register",
-                                "/api/auth/**").permitAll()
+                                "/api/auth/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html").permitAll()
                         // Всё остальное — требует JWT
                         .anyRequest().authenticated()
                 )
