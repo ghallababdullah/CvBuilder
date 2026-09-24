@@ -3,6 +3,7 @@ package io.github.ghallababdullah.cv_builder.resume;
 import io.github.ghallababdullah.cv_builder.auth.SecurityUtils;
 import io.github.ghallababdullah.cv_builder.resume.dto.CreateResumeRequest;
 import io.github.ghallababdullah.cv_builder.resume.dto.ResumeResponse;
+import io.github.ghallababdullah.cv_builder.resume.dto.UpdateResumeRequest;
 import io.github.ghallababdullah.cv_builder.template.Template;
 import io.github.ghallababdullah.cv_builder.template.TemplateNotFoundException;
 import io.github.ghallababdullah.cv_builder.template.TemplateRepository;
@@ -84,6 +85,32 @@ public class ResumeService {
         resume.setIsActive(false);
         resume.setUpdatedAt(Instant.now());
         resumeRepository.save(resume);
+    }
+
+    @Transactional
+    public ResumeResponse update (Long id , UpdateResumeRequest request){
+        log.info("Updating resume with id: {}", id);
+        Resume resume = resumeRepository.findById(id)
+                .orElseThrow(() -> new ResumeNotFoundException(id));
+
+        checkOwnership(resume);
+
+        // Partial update — обновляем только переданные поля
+        if (request.getTitle() != null) {
+            resume.setTitle(request.getTitle());
+        }
+
+        if (request.getFormData() != null) {
+            resume.setFormData(request.getFormData());
+        }
+
+        resume.setUpdatedAt(Instant.now());
+
+        Resume updated = resumeRepository.save(resume);
+        log.info("Resume {} updated successfully", id);
+
+        return toResponse(updated);
+
     }
 
     /**

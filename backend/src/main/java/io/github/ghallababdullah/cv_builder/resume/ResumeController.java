@@ -2,6 +2,7 @@ package io.github.ghallababdullah.cv_builder.resume;
 
 import io.github.ghallababdullah.cv_builder.resume.dto.CreateResumeRequest;
 import io.github.ghallababdullah.cv_builder.resume.dto.ResumeResponse;
+import io.github.ghallababdullah.cv_builder.resume.dto.UpdateResumeRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -86,5 +87,26 @@ public class ResumeController {
             @PathVariable Long id) {
         resumeService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+    @PatchMapping("/{id}")
+    @Operation(
+            summary = "Update resume",
+            description = "Partial update. Only send fields you want to change. User can only update their own resumes."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Resume updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid data"),
+            @ApiResponse(responseCode = "401", description = "Not authenticated"),
+            @ApiResponse(responseCode = "403", description = "Not owner"),
+            @ApiResponse(responseCode = "404", description = "Resume not found")
+    })
+    public ResponseEntity<ResumeResponse> update (
+            @Parameter(description = "Resume ID", example = "1")
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateResumeRequest request
+    )
+    {
+        ResumeResponse response = resumeService.update(id, request);
+        return ResponseEntity.ok(response);
     }
 }
