@@ -43,11 +43,11 @@ public class UserService {
         log.info("User registered successfully with id: {}", saved.getId());
 
         // 5. Вернуть DTO (без пароля!)
-        return new UserResponse(saved.getEmail(), saved.getFullName(), saved.getId(), saved.getCreatedAt());
+        return new UserResponse(saved.getEmail(), saved.getFullName(), saved.getId(), saved.getCreatedAt() , saved.getRole());
     }
     public UserResponse getById(Long id){
         log.info("Fetching user by id: {}", id);
         User user = userRepository.findById(id).orElseThrow(()-> new UserNotFoundException(id));
-        return new UserResponse(user.getEmail(), user.getFullName(), user.getId(), user.getCreatedAt());
+        return new UserResponse(user.getEmail(), user.getFullName(), user.getId(), user.getCreatedAt(), user.getRole());
     }
 }

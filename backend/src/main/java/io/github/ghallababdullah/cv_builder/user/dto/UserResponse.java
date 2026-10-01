@@ -18,6 +18,8 @@ public class UserResponse {
     private Long id;
 
     private Instant createdAt ;
+    
+    private  String role ; 
 
 
 }
